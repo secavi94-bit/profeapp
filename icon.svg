@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#4f46e5"/>
+  <rect x="60" y="60" width="392" height="392" rx="80" fill="#6366f1"/>
+  <!-- Book shape -->
+  <rect x="130" y="140" width="110" height="240" rx="12" fill="white" opacity="0.95"/>
+  <rect x="135" y="140" width="4" height="240" fill="#c7d2fe"/>
+  <rect x="272" y="140" width="110" height="240" rx="12" fill="white" opacity="0.95"/>
+  <rect x="277" y="140" width="4" height="240" fill="#c7d2fe"/>
+  <!-- Lines on left page -->
+  <rect x="150" y="175" width="70" height="8" rx="4" fill="#a5b4fc"/>
+  <rect x="150" y="198" width="55" height="7" rx="3.5" fill="#c7d2fe"/>
+  <rect x="150" y="218" width="65" height="7" rx="3.5" fill="#c7d2fe"/>
+  <rect x="150" y="238" width="50" height="7" rx="3.5" fill="#c7d2fe"/>
+  <!-- Lines on right page -->
+  <rect x="292" y="175" width="70" height="8" rx="4" fill="#a5b4fc"/>
+  <rect x="292" y="198" width="55" height="7" rx="3.5" fill="#c7d2fe"/>
+  <rect x="292" y="218" width="65" height="7" rx="3.5" fill="#c7d2fe"/>
+  <rect x="292" y="238" width="50" height="7" rx="3.5" fill="#c7d2fe"/>
+  <!-- Star/check accent -->
+  <circle cx="256" cy="390" r="28" fill="#10b981"/>
+  <text x="256" y="400" font-family="system-ui,sans-serif" font-size="30" font-weight="900" text-anchor="middle" fill="white">✓</text>
+</svg>

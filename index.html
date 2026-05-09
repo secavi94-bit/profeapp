@@ -311,6 +311,23 @@
   </div>
 </div>
 
+<!-- ═══ STUDENT LINK MODAL ═══ -->
+<div class="modal-overlay" id="link-modal">
+  <div class="modal-box">
+    <h3>🔗 Enlace para alumnos</h3>
+    <p style="font-size:.82rem;color:#718096;margin-bottom:.9rem;">Comparte este enlace con tus alumnos por WhatsApp o email. Cuando añadas contenido nuevo, genera un enlace nuevo.</p>
+    <div class="fg">
+      <label>Enlace</label>
+      <textarea id="link-url-output" readonly style="min-height:90px;font-size:.72rem;word-break:break-all;background:#f8f7ff;"></textarea>
+    </div>
+    <p style="font-size:.75rem;color:#a0aec0;margin-top:.4rem;">⚠️ Cada alumno solo podrá ver sus tareas asignadas.</p>
+    <div class="modal-actions">
+      <button class="btn-outline" onclick="closeModal('link-modal')">Cerrar</button>
+      <button class="btn-primary" onclick="copyStudentLink()">📋 Copiar enlace</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ CHANGE PASSWORD MODAL ═══ -->
 <div class="modal-overlay" id="change-pwd-modal">
   <div class="modal-box">
@@ -455,6 +472,11 @@ Instrucciones: Traduce las frases al español.
   <div id="section-alumnos" class="section">
     <div class="card">
       <h2>👥 Alumnos</h2>
+      <div style="margin-bottom:1rem;">
+        <button class="btn-green" onclick="generateStudentLink()">🔗 Generar enlace para alumnos</button>
+        <p style="font-size:.75rem;color:#718096;margin-top:.4rem;">Genera un enlace para compartir con tus alumnos. Ellos entrarán con su usuario y contraseña.</p>
+      </div>
+      <hr class="divider">
       <div class="add-row">
         <input type="text" id="new-student-name" placeholder="Nombre del alumno" onkeydown="if(event.key==='Enter')addStudent()">
         <button class="btn-primary" onclick="addStudent()">+ Añadir</button>
@@ -582,9 +604,18 @@ function saveTeacherData(d) { localStorage.setItem('profeapp_teacher', JSON.stri
 // INIT
 // ════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
+  // Check if URL contains student data shared by teacher
+  const fromHash = checkStudentHash();
+
+  const studentMode = localStorage.getItem('profeapp_student_mode');
+  if (fromHash || studentMode === '1') {
+    document.getElementById('login-screen').classList.remove('hidden');
+    selectRole('student');
+    return;
+  }
+
   const teacher = getTeacherData();
   if (!teacher) {
-    // First run — show setup
     document.getElementById('setup-screen').classList.remove('hidden');
     return;
   }
@@ -595,6 +626,42 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('login-screen').classList.remove('hidden');
   }
 });
+
+// ════════════════════════════════════
+// STUDENT LINK  —  share data via URL hash
+// ════════════════════════════════════
+function checkStudentHash() {
+  const hash = window.location.hash;
+  if (!hash.startsWith('#d=')) return false;
+  try {
+    const encoded = hash.slice(3);
+    const json    = decodeURIComponent(escape(atob(encoded)));
+    const data    = JSON.parse(json);
+    if (data.lib)      saveLib(data.lib);
+    if (data.students) saveStudents(data.students);
+    localStorage.setItem('profeapp_student_mode', '1');
+    history.replaceState(null, '', window.location.pathname);
+    return true;
+  } catch(e) { return false; }
+}
+
+function generateStudentLink() {
+  const data    = { lib: loadLib(), students: loadStudents(), v: 1 };
+  if (!data.students.length) { toast('Añade alumnos primero.'); return; }
+  if (!data.lib.length)      { toast('Añade contenido a la biblioteca primero.'); return; }
+  const json    = JSON.stringify(data);
+  const encoded = btoa(unescape(encodeURIComponent(json)));
+  const url     = `${location.origin}${location.pathname}#d=${encoded}`;
+  document.getElementById('link-url-output').value = url;
+  openModal('link-modal');
+}
+
+function copyStudentLink() {
+  const url = document.getElementById('link-url-output').value;
+  navigator.clipboard.writeText(url)
+    .then(() => { toast('📋 Enlace copiado.'); closeModal('link-modal'); })
+    .catch(() => toast('No se pudo copiar — selecciónalo manualmente.'));
+}
 
 function selectRole(role) {
   document.getElementById('role-teacher').classList.toggle('sel', role === 'teacher');

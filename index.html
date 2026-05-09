@@ -620,9 +620,8 @@ async function doSetup() {
   const hash = await hashPwd(pwd);
   saveTeacherData({ name, passwordHash: hash });
   document.getElementById('setup-screen').classList.add('hidden');
-  const session = { role: 'teacher', name };
-  setSession(session);
-  enterApp(session);
+  document.getElementById('login-screen').classList.remove('hidden');
+  toast('✅ Cuenta creada. Ahora entra con tu contraseña.');
 }
 
 // ── TEACHER LOGIN ──

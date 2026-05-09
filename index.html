@@ -249,22 +249,40 @@
 <div id="setup-screen" class="auth-screen hidden">
   <div class="auth-box">
     <div class="auth-logo">ProfeApp</div>
-    <div class="auth-sub">Bienvenida. Crea la contraseña de profesora para empezar.</div>
-    <div class="fg">
-      <label>Tu nombre</label>
-      <input type="text" id="setup-name" placeholder="Ej: Daryna" autocomplete="off">
-    </div>
-    <div class="fg">
-      <label>Contraseña</label>
-      <input type="password" id="setup-pwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
-    </div>
-    <div class="fg">
-      <label>Repetir contraseña</label>
-      <input type="password" id="setup-pwd2" placeholder="Repite la contraseña" autocomplete="new-password">
-    </div>
-    <div class="auth-err" id="setup-err"></div>
-    <div style="margin-top:1rem;">
-      <button class="btn-primary" style="width:100%;" onclick="doSetup()">Crear cuenta de profesora</button>
+    <div class="auth-sub">Primera vez — ¿eres profesora o alumno/a?</div>
+
+    <!-- Teacher setup -->
+    <details id="setup-teacher-section">
+      <summary style="cursor:pointer;font-weight:700;color:#4f46e5;font-size:.9rem;margin-bottom:.9rem;list-style:none;">👩‍🏫 Soy profesora — crear cuenta</summary>
+      <div class="fg">
+        <label>Tu nombre</label>
+        <input type="text" id="setup-name" placeholder="Ej: Daryna" autocomplete="off">
+      </div>
+      <div class="fg">
+        <label>Contraseña</label>
+        <input type="password" id="setup-pwd" placeholder="Mínimo 4 caracteres" autocomplete="new-password">
+      </div>
+      <div class="fg">
+        <label>Repetir contraseña</label>
+        <input type="password" id="setup-pwd2" placeholder="Repite la contraseña" autocomplete="new-password">
+      </div>
+      <div class="auth-err" id="setup-err"></div>
+      <div style="margin-top:.8rem;">
+        <button class="btn-primary" style="width:100%;" onclick="doSetup()">Crear cuenta de profesora</button>
+      </div>
+    </details>
+
+    <div class="auth-divider"></div>
+
+    <!-- Student link -->
+    <div>
+      <p style="font-weight:700;color:#059669;font-size:.9rem;margin-bottom:.7rem;">🎓 Soy alumno/a — tengo un enlace</p>
+      <div class="fg">
+        <label>Pega el enlace que te dio tu profesora</label>
+        <textarea id="student-link-input" style="min-height:70px;font-size:.78rem;" placeholder="https://secavi94-bit.github.io/profeapp/#d=..."></textarea>
+      </div>
+      <div class="auth-err" id="link-err"></div>
+      <button class="btn-green" style="width:100%;" onclick="loadFromLink()">Entrar como alumno/a</button>
     </div>
   </div>
 </div>
@@ -643,6 +661,37 @@ function checkStudentHash() {
     history.replaceState(null, '', window.location.pathname);
     return true;
   } catch(e) { return false; }
+}
+
+function loadFromLink() {
+  const raw    = document.getElementById('student-link-input').value.trim();
+  const errEl  = document.getElementById('link-err');
+  errEl.textContent = '';
+  if (!raw) { errEl.textContent = 'Pega el enlace primero.'; return; }
+
+  // Extract the base64 part — accept full URL or just the hash fragment
+  let encoded = '';
+  const marker = '#d=';
+  const idx = raw.indexOf(marker);
+  if (idx !== -1) {
+    encoded = raw.slice(idx + marker.length);
+  } else {
+    encoded = raw; // maybe they pasted just the base64 directly
+  }
+
+  try {
+    const json = decodeURIComponent(escape(atob(encoded.trim())));
+    const data = JSON.parse(json);
+    if (!data.students || !data.lib) throw new Error('invalid');
+    saveLib(data.lib);
+    saveStudents(data.students);
+    localStorage.setItem('profeapp_student_mode', '1');
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+    selectRole('student');
+  } catch(e) {
+    errEl.textContent = 'Enlace no válido. Pide a tu profesora que genere uno nuevo.';
+  }
 }
 
 function generateStudentLink() {
